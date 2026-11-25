@@ -17,13 +17,15 @@
     '#btnCheck{display:none!important}' +   /* verificar corre en la PC, aca no hace nada */
     /* --- modo telefono: pantallas angostas (vertical) --- */
     '@media (max-width:640px){' +
-      '.top{padding:10px 12px;gap:10px;flex-wrap:wrap}' +
+      '.top{padding:10px 12px;gap:8px;flex-wrap:wrap}' +
       '.brand h1{font-size:17px}' +
+      '.top .btn{padding:8px 12px;font-size:12.5px;border-radius:10px}' +
       '.search{order:3;flex:1 1 100%;max-width:none}' +
       '.groups{padding:8px 12px;gap:6px}' +
       '.groups .chip{font-size:12px;padding:6px 10px}' +
-      '.filters{padding:8px 12px;gap:8px}' +
-      '.msel,.filters .btn{font-size:12px}' +
+      '.filters{padding:8px 12px;gap:8px;flex-wrap:nowrap;overflow-x:auto}' +
+      '.filters>*{flex:0 0 auto;white-space:nowrap}' +
+      '.msel,.filters .btn{font-size:12px;padding:7px 11px}' +
       '.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 12px 16px}' +
       '.card{padding:8px;gap:9px;border-radius:11px}' +
       '.card .logo{width:40px;height:40px;flex:0 0 40px;padding:3px}' +
