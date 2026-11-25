@@ -1,0 +1,20 @@
+# Compilados y configuracion local
+local.properties
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Los assets de la web NO se publican: channels.json trae URLs con credenciales.
+# tvmode.js si es nuestro, por eso queda exceptuado.
+app/src/main/assets/web/*
+!app/src/main/assets/web/tvmode.js
+
+# Basura de IDE / sistema
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
