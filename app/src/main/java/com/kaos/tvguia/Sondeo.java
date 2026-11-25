@@ -43,6 +43,7 @@ public class Sondeo {
     private final File fMedidos;
     private final File fCursor;
     private final File fUrls;
+    private final File fCatalogo;
 
     private final Map<String, Boolean> medidos = new ConcurrentHashMap<>();
     private final Map<String, Long> cuando = new ConcurrentHashMap<>();
@@ -54,6 +55,7 @@ public class Sondeo {
         fMedidos = new File(dir, "medidos.json");
         fCursor = new File(dir, "sondeo.cursor");
         fUrls = new File(dir, "catalogo-urls.txt");
+        fCatalogo = new File(dir, "catalogo-web.json");
         cargar();
     }
 
@@ -251,6 +253,26 @@ public class Sondeo {
 
     private List<String> leerUrls() {
         List<String> out = new ArrayList<>();
+        if (!fUrls.exists() && fCatalogo.exists()) {
+            // instalacion que ya tenia el catalogo de una version anterior: se deriva la lista
+            try {
+                JSONObject raiz = new JSONObject(new String(Catalogo.leer(fCatalogo), StandardCharsets.UTF_8));
+                org.json.JSONArray canales = raiz.optJSONArray("channels");
+                StringBuilder sb = new StringBuilder(1536 * 1024);
+                for (int i = 0; canales != null && i < canales.length(); i++) {
+                    JSONObject c = canales.optJSONObject(i);
+                    if (c == null) continue;
+                    String u = c.optString("url", "");
+                    if (u.startsWith("http")) sb.append(u).append('\n');
+                }
+                try (FileOutputStream out2 = new FileOutputStream(fUrls)) {
+                    out2.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+                }
+                Log.d("tvguia", "sondeo: lista de urls derivada del catalogo existente");
+            } catch (Exception e) {
+                Log.w("tvguia", "no pude derivar la lista de urls", e);
+            }
+        }
         if (!fUrls.exists()) return out;
         try (FileInputStream in = new FileInputStream(fUrls)) {
             ByteArrayOutputStream buf = new ByteArrayOutputStream(1 << 20);

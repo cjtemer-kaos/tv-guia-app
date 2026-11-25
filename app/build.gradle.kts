@@ -10,8 +10,8 @@ android {
         applicationId = "com.kaos.tvguia"
         minSdk = 24
         targetSdk = 37
-        versionCode = 5
-        versionName = "1.4"
+        versionCode = 6
+        versionName = "1.5"
     }
 
     buildTypes {
@@ -35,6 +35,7 @@ android {
 dependencies {
     implementation("androidx.webkit:webkit:1.12.1")
 }
+
 
 
 
