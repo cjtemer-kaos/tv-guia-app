@@ -9,9 +9,10 @@ app/build/
 *.jks
 
 # Los assets de la web NO se publican: channels.json trae URLs con credenciales.
-# tvmode.js si es nuestro, por eso queda exceptuado.
+# tvmode.js y facets.json si son nuestros (facets solo tiene nombres de paises e idiomas).
 app/src/main/assets/web/*
 !app/src/main/assets/web/tvmode.js
+!app/src/main/assets/web/facets.json
 
 # Basura de IDE / sistema
 .idea/

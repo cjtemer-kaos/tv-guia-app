@@ -53,6 +53,7 @@ public class MainActivity extends Activity {
     private WebView web;
     private WebViewAssetLoader assets;
     private FrameLayout root;
+    private Catalogo catalogo;
     private View pantallaCompleta;
     private WebChromeClient.CustomViewCallback volverDePantalla;
 
@@ -98,6 +99,23 @@ public class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         web.loadUrl(HOME);
+
+        // catalogo: si hay uno bajado de GitHub lo usa; si no, el empaquetado.
+        catalogo = new Catalogo(this);
+        catalogo.alTerminar(() -> runOnUiThread(this::recargarSiSePuede));
+        catalogo.quizasActualizar(false);
+        Log.d("tvguia", "catalogo inicial: " + (catalogo.hayDatos()
+                ? "bajado de GitHub (" + catalogo.meta()[0] + ")" : "empaquetado"));
+    }
+
+    /** Despues de actualizar el catalogo, recarga la pagina si no hay nada reproduciendose. */
+    private void recargarSiSePuede() {
+        if (web == null) return;
+        web.evaluateJavascript(
+                "(function(){var p=document.getElementById('player');"
+                + "if(p&&!p.classList.contains('hidden'))return 'ocupado';"
+                + "location.reload();return 'recargando';})()",
+                valor -> Log.d("tvguia", "catalogo nuevo: " + valor));
     }
 
     private void inmersivo() {
@@ -135,8 +153,15 @@ public class MainActivity extends Activity {
                 }
                 switch (ruta) {
                     case "/api/channels":
+                        if (catalogo != null && catalogo.hayDatos()) {
+                            return archivo(catalogo.datos());
+                        }
+                        if (catalogo != null) catalogo.quizasActualizar(false);
                         return canales();
                     case "/api/health":
+                        if (catalogo != null && catalogo.hayDatos() && catalogo.salud().exists()) {
+                            return archivo(catalogo.salud());
+                        }
                         return asset("web/status.json");
                     case "/api/epg":
                         return json("{\"channels\":{}}");
@@ -145,7 +170,8 @@ public class MainActivity extends Activity {
                     case "/api/status":
                         return json("{\"ok\":true,\"vlc\":false,\"app\":true}");
                     case "/api/check":
-                        return json("{\"ok\":false,\"msg\":\"La verificacion corre en la PC, no en la app\"}");
+                        if (catalogo != null) catalogo.quizasActualizar(true);
+                        return json("{\"ok\":true,\"msg\":\"Actualizando el catalogo desde GitHub\"}");
                     case "/api/info":
                     case "/api/config":
                         return json("{\"app\":\"TV Guia\"}");
@@ -213,6 +239,12 @@ public class MainActivity extends Activity {
         InputStream in = getAssets().open(nombre);
         return new WebResourceResponse("application/json", "utf-8", 200, "OK",
                 cors(), in);
+    }
+
+    /** Sirve un JSON ya convertido y guardado en disco (catalogo bajado de GitHub). */
+    private WebResourceResponse archivo(java.io.File f) throws IOException {
+        return new WebResourceResponse("application/json", "utf-8", 200, "OK",
+                cors(), new java.io.FileInputStream(f));
     }
 
     /**

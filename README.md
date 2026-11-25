@@ -23,6 +23,32 @@ encendida**.
 Además: oculta el botón *Verificar* (el sondeo corre en la PC) y filtra del catálogo los canales
 que apuntan a `127.0.0.1`, que son los del puente de audio local y no pueden andar en el aparato.
 
+## Actualización del catálogo (solo GitHub)
+
+La app **no depende de la PC**: al arrancar baja la lista del catálogo público
+([`cjtemer-kaos/tv-guia-data`](https://github.com/cjtemer-kaos/tv-guia-data)) y la refresca cada
+12 h, con `If-None-Match` para no gastar datos si no cambió.
+
+```
+https://raw.githubusercontent.com/cjtemer-kaos/tv-guia-data/main/public/catalog.json
+```
+
+El catálogo público trae otro formato (`{n,name,g,c,lang,ok,logo,url}`) y no incluye
+`agent`/`referrer` por las reglas anti-fuga del repo. `Catalogo.java` lo **convierte al formato
+que espera la web** al bajar, una sola vez (4,2 MB ya listos en disco):
+
+- `{id,name,logo,group,g,url,c,l,k,num,lang,lang_label}` + `groups` + `facets`
+- los grupos vienen con el idioma pegado (`"en · Generalistas"`): se normaliza a los 14 canónicos
+  y el idioma queda en `lang_label`
+- la categoría se deriva del grupo, para que el filtro "categorías" siga sirviendo
+- de `ok` se arma el `status` que la UI usa para el filtro *En vivo*
+
+Si el aparato no tiene red al arrancar, usa el catálogo empaquetado en el APK. Cuando la
+descarga termina y no hay nada reproduciéndose, la página se recarga sola.
+
+Consecuencia a tener en cuenta: un canal que **exige `User-Agent` o `Referer`** (por ejemplo los
+DSports) no va a andar con el catálogo de GitHub, porque esos campos no se publican.
+
 ## Compilar
 
 Necesitás JDK 17+ y el SDK de Android (`compileSdk 37`, `minSdk 24`).
@@ -61,6 +87,8 @@ este repo.
 - **X96-W** (Android TV, 1280x720): grilla con logos, 6.075 canales en vivo, reproducción real
   (Toonami, DSports LatAm 1 y 2).
 - **OPPO Find X6** (Android 16): misma APK, reproducción a pantalla completa por touch.
+- **Auto-actualización (1.1)**: en el X96-W, con los datos borrados, bajó el catálogo de GitHub en
+  6 s (`10890 canales, 7951 vivos, version 2026-11-25T15:32:11Z`) y recargó la grilla sola.
 
 Límites conocidos: el audio **MP2** no suena en el `WebView` (el navegador no lo decodifica, igual
 que en la PC); esos canales necesitan VLC o el puente de audio. Los canales muertos del catálogo
