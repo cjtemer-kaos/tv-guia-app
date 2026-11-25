@@ -14,7 +14,23 @@
   estilo.textContent =
     '#grid .card.tvfoco{outline:3px solid #ff6b3d;outline-offset:2px;' +
     'transform:translateY(-2px);background:var(--card-h)}' +
-    '#btnCheck{display:none!important}';   /* verificar corre en la PC, aca no hace nada */
+    '#btnCheck{display:none!important}' +   /* verificar corre en la PC, aca no hace nada */
+    /* --- modo telefono: pantallas angostas (vertical) --- */
+    '@media (max-width:640px){' +
+      '.top{padding:10px 12px;gap:10px;flex-wrap:wrap}' +
+      '.brand h1{font-size:17px}' +
+      '.search{order:3;flex:1 1 100%;max-width:none}' +
+      '.groups{padding:8px 12px;gap:6px}' +
+      '.groups .chip{font-size:12px;padding:6px 10px}' +
+      '.filters{padding:8px 12px;gap:8px}' +
+      '.msel,.filters .btn{font-size:12px}' +
+      '.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 12px 16px}' +
+      '.card{padding:8px;gap:9px;border-radius:11px}' +
+      '.card .logo{width:40px;height:40px;flex:0 0 40px;padding:3px}' +
+      '.card .nm{font-size:12px;line-height:1.2}' +
+      '.card .num{font-size:9.5px;top:5px;right:7px}' +
+      '.card .meta{line-height:1.2}' +
+    '}';
   document.head.appendChild(estilo);
 
   function tarjetas() {
