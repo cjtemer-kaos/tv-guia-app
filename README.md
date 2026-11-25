@@ -49,6 +49,24 @@ descarga termina y no hay nada reproduciéndose, la página se recarga sola.
 Consecuencia a tener en cuenta: un canal que **exige `User-Agent` o `Referer`** (por ejemplo los
 DSports) no va a andar con el catálogo de GitHub, porque esos campos no se publican.
 
+## El "está vivo" se mide en el aparato, no en un servidor
+
+Una lista con un solo `ok` global es mentira: el mismo canal puede andar en Montevideo y estar
+bloqueado en Madrid, y un CDN puede caerse para un ISP y no para otro. Por eso la app **mide
+desde su propia conexión**:
+
+- `Sondeo.java` prueba el catálogo por lotes de **400 canales** en segundo plano (12 hilos, 6 s de
+  conexión y 9 s de lectura, se conforma con que el manifiesto devuelva `#EXTM3U`).
+- El resultado se guarda en `medidos.json` con fecha, **TTL 72 h**, y un cursor que avanza para
+  cubrir todo el catálogo en varias vueltas sin repetir siempre los mismos.
+- `/api/health` mezcla: parte del `status` publicado y **lo pisa con lo medido en este aparato**
+  (campo `medidos_local`). Lo local manda.
+- Es automático: al arrancar corre un lote, y la web ya dispara sola la verificación cuando los
+  datos tienen más de 6 h. El botón **Verificar** fuerza un lote nuevo cuando quieras.
+
+En el X96-W, primera corrida: 400 canales medidos en 52 s y el contador de "En vivo" bajó de
+7.964 a 7.906 (58 que la lista publicada daba vivos y desde esa red no abren).
+
 ## Compilar
 
 Necesitás JDK 17+ y el SDK de Android (`compileSdk 37`, `minSdk 24`).

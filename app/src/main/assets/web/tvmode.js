@@ -10,11 +10,10 @@
   window.__tvModo = true;
 
   var foco = -1;
-  var estilo = document.createElement('style');
+    var estilo = document.createElement('style');
   estilo.textContent =
     '#grid .card.tvfoco{outline:3px solid #ff6b3d;outline-offset:2px;' +
     'transform:translateY(-2px);background:var(--card-h)}' +
-    '#btnCheck{display:none!important}' +   /* verificar corre en la PC, aca no hace nada */
     /* --- modo telefono: pantallas angostas (vertical) --- */
     '@media (max-width:640px){' +
       '.top{padding:10px 12px;gap:8px;flex-wrap:wrap}' +

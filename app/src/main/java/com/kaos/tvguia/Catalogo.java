@@ -145,6 +145,7 @@ public class Catalogo {
         Map<String, String> etiquetasPais = etiquetasPais();
         JSONArray salida = new JSONArray();
         JSONObject saludCanales = new JSONObject();
+        StringBuilder listaUrls = new StringBuilder(1536 * 1024);
         Map<String, Integer> grupos = new HashMap<>();
         int vivos = 0;
 
@@ -180,6 +181,7 @@ public class Catalogo {
             o.put("lang", idioma);
             o.put("lang_label", etiquetasIdioma.getOrDefault(idioma, idioma));
             salida.put(o);
+            listaUrls.append(url).append('\n');
 
             Integer cuenta = grupos.get(grupo);
             grupos.put(grupo, cuenta == null ? 1 : cuenta + 1);
@@ -211,6 +213,8 @@ public class Catalogo {
 
         escribir(fDatos, payload.toString().getBytes(StandardCharsets.UTF_8));
         escribir(fSalud, salud.toString().getBytes(StandardCharsets.UTF_8));
+        escribir(new File(fDatos.getParentFile(), "catalogo-urls.txt"),
+                listaUrls.toString().getBytes(StandardCharsets.UTF_8));
         guardarMeta(version, nuevoEtag);
         Log.d("tvguia", "catalogo: " + salida.length() + " canales, " + vivos + " vivos, version " + version);
         return true;

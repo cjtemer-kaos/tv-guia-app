@@ -54,6 +54,7 @@ public class MainActivity extends Activity {
     private WebViewAssetLoader assets;
     private FrameLayout root;
     private Catalogo catalogo;
+    private Sondeo sondeo;
     private View pantallaCompleta;
     private WebChromeClient.CustomViewCallback volverDePantalla;
 
@@ -102,10 +103,18 @@ public class MainActivity extends Activity {
 
         // catalogo: si hay uno bajado de GitHub lo usa; si no, el empaquetado.
         catalogo = new Catalogo(this);
-        catalogo.alTerminar(() -> runOnUiThread(this::recargarSiSePuede));
+        catalogo.alTerminar(() -> runOnUiThread(() -> {
+            recargarSiSePuede();
+            if (sondeo != null) sondeo.quizas(false);   // ya hay lista de urls para medir
+        }));
         catalogo.quizasActualizar(false);
         Log.d("tvguia", "catalogo inicial: " + (catalogo.hayDatos()
                 ? "bajado de GitHub (" + catalogo.meta()[0] + ")" : "empaquetado"));
+
+        // sondeo propio: la disponibilidad depende de la red desde donde se mira, asi que
+        // cada aparato mide el catalogo desde su conexion (por lotes, en segundo plano).
+        sondeo = new Sondeo(this);
+        sondeo.quizas(false);
     }
 
     /** Despues de actualizar el catalogo, recarga la pagina si no hay nada reproduciendose. */
@@ -160,6 +169,9 @@ public class MainActivity extends Activity {
                         return canales();
                     case "/api/health":
                         if (catalogo != null && catalogo.hayDatos() && catalogo.salud().exists()) {
+                            if (sondeo != null) {
+                                return json(sondeo.salud(catalogo.salud()));
+                            }
                             return archivo(catalogo.salud());
                         }
                         return asset("web/status.json");
@@ -170,8 +182,9 @@ public class MainActivity extends Activity {
                     case "/api/status":
                         return json("{\"ok\":true,\"vlc\":false,\"app\":true}");
                     case "/api/check":
-                        if (catalogo != null) catalogo.quizasActualizar(true);
-                        return json("{\"ok\":true,\"msg\":\"Actualizando el catalogo desde GitHub\"}");
+                        if (sondeo != null) sondeo.quizas(true);   // mide este aparato, ahora
+                        if (catalogo != null) catalogo.quizasActualizar(false);
+                        return json("{\"ok\":true,\"msg\":\"Midiendo desde este aparato\"}");
                     case "/api/info":
                     case "/api/config":
                         return json("{\"app\":\"TV Guia\"}");
